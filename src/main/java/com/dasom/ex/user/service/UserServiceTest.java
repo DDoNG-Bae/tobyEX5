@@ -19,6 +19,10 @@ import com.dasom.ex.user.dao.UserDao;
 import com.dasom.ex.user.domain.Level;
 import com.dasom.ex.user.domain.User;
 
+import static com.dasom.ex.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
+import static com.dasom.ex.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/applicationContext.xml")
 public class UserServiceTest {
@@ -32,11 +36,11 @@ public class UserServiceTest {
 	@Before
 	public void setUp() {
 		users=Arrays.asList(
-				new User("t1","ㅌ1","p1",Level.BASIC,49,0),
-				new User("t2","ㅌ2","p2",Level.BASIC,50,0),
-				new User("t3","ㅌ3","p3",Level.SILVER,60,29),
-				new User("t4","ㅌ4","p4",Level.SILVER,60,30),
-				new User("t5","ㅌ5","p5",Level.GOLD,100,100)
+				new User("t1","ㅌ1","p1",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER-1,0),
+				new User("t2","ㅌ2","p2",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER,0),
+				new User("t3","ㅌ3","p3",Level.SILVER,MIN_RECOMMEND_FOR_GOLD-1,29),
+				new User("t4","ㅌ4","p4",Level.SILVER,MIN_RECOMMEND_FOR_GOLD,30),
+				new User("t5","ㅌ5","p5",Level.GOLD,100,Integer.MAX_VALUE)
 				);
 	}
 	
@@ -49,16 +53,21 @@ public class UserServiceTest {
 		
 		userService.upgradeLevels();
 		
-		checkLevel(users.get(0), Level.BASIC);
-		checkLevel(users.get(1), Level.SILVER);
-		checkLevel(users.get(2), Level.SILVER);
-		checkLevel(users.get(3), Level.GOLD);
-		checkLevel(users.get(4), Level.GOLD);
+		checkLevel(users.get(0), false);
+		checkLevel(users.get(1), true);
+		checkLevel(users.get(2), false);
+		checkLevel(users.get(3), true);
+		checkLevel(users.get(4), false);
 	}
 	
-	public void checkLevel(User user,Level expectedLevel) {
+	public void checkLevel(User user,boolean upgraded) {
 		User userUpdate = userDao.get(user.getId());
-		assertThat(userUpdate.getLevel(),is(expectedLevel));
+		if(upgraded) {
+			assertThat(userUpdate.getLevel(),is(user.getLevel().nextLevel()));
+		}
+		else {
+			assertThat(userUpdate.getLevel(),is(user.getLevel()));
+		}
 	}
 	
 	@Test
