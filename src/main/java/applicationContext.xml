@@ -19,5 +19,10 @@
 	
 	<bean id="userService" class="com.dasom.ex.user.service.UserService">
 		<property name="userDao" ref="userDao"/>
+		<property name="userLevelUpgradePolicy" ref="standardUserLevelUpgradePolicy"/>
+	</bean>
+	
+	<bean id="standardUserLevelUpgradePolicy" class = "com.dasom.ex.user.service.StandardLevelUpgradePolicy">
+		<property name="userDao" ref="userDao"/>
 	</bean>
 </beans>

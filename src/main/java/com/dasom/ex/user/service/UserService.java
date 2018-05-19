@@ -7,7 +7,17 @@ import com.dasom.ex.user.domain.Level;
 import com.dasom.ex.user.domain.User;
 
 public class UserService {
+	
+	public static final int MIN_LOGCOUNT_FOR_SILVER=50;
+	public static final int MIN_RECOMMEND_FOR_GOLD=30;
+	
 	UserDao userDao;
+	UserLevelUpgradePolicy userLevelUpgradePolicy;
+	
+	
+	public void setUserLevelUpgradePolicy(UserLevelUpgradePolicy userLevelUpgradePolicy) {
+		this.userLevelUpgradePolicy = userLevelUpgradePolicy;
+	}
 
 	public UserDao getUserDao() {
 		return userDao;
@@ -20,8 +30,8 @@ public class UserService {
 	public void upgradeLevels() {
 		List<User> users = userDao.getAll();
 		for(User user:users) {
-			if(canUpgradeLevel(user)) {
-				upgradeLevel(user);
+			if(userLevelUpgradePolicy.canUpgradeLevel(user)) {
+				userLevelUpgradePolicy.upgradeLevel(user);
 			}
 		}
 	}
@@ -31,19 +41,4 @@ public class UserService {
 		userDao.add(user);
 	}
 	
-	private boolean canUpgradeLevel(User user) {
-		Level currentLevel = user.getLevel();
-		switch(currentLevel) {
-			case BASIC : return (user.getLogin()>=50);
-			case SILVER : return (user.getRecommend()>=30);
-			case GOLD : return false;
-			default : throw new IllegalArgumentException("Unknown Level : "+currentLevel);
-		}
-	}
-	
-	private void upgradeLevel(User user) {
-		
-		user.upgradeLevel();
-		userDao.update(user);
-	}
 }
