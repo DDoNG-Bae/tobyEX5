@@ -22,7 +22,7 @@ import com.dasom.ex.user.domain.Level;
 import com.dasom.ex.user.domain.User;
 
 import static com.dasom.ex.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static com.dasom.ex.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+import static com.dasom.ex.user.service.UserService.MIN_RECCOMEND_FOR_GOLD;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -40,8 +40,8 @@ public class UserServiceTest {
 		users=Arrays.asList(
 				new User("t1","ㅌ1","p1",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER-1,0),
 				new User("t2","ㅌ2","p2",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER,0),
-				new User("t3","ㅌ3","p3",Level.SILVER,MIN_RECOMMEND_FOR_GOLD-1,29),
-				new User("t4","ㅌ4","p4",Level.SILVER,MIN_RECOMMEND_FOR_GOLD,30),
+				new User("t3","ㅌ3","p3",Level.SILVER,MIN_RECCOMEND_FOR_GOLD-1,29),
+				new User("t4","ㅌ4","p4",Level.SILVER,MIN_RECCOMEND_FOR_GOLD,30),
 				new User("t5","ㅌ5","p5",Level.GOLD,100,Integer.MAX_VALUE)
 				);
 	}
