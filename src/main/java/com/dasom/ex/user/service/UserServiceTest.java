@@ -3,6 +3,7 @@ package com.dasom.ex.user.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOnSupplier;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -87,4 +89,40 @@ public class UserServiceTest {
 		assertThat(userWithLevelRead.getLevel(),is(userWithLevel.getLevel()));
 		assertThat(userWithoutLevelRead.getLevel(),is(Level.BASIC));
 	}
+	
+	@Test
+	public void upgradeAllOrNothing() {
+		UserService testUserService = new TestUserService(users.get(3).getId());
+		testUserService.setUserDao(this.userDao);
+		userDao.deleteAll();
+		for(User user:users) userDao.add(user);
+		
+		try {
+			testUserService.upgradeLevels();
+			fail("TestUserServiceException expected");
+		}
+		catch(TestUserServiceException e) {
+			
+		}
+		
+		checkLevel(users.get(1), false);
+		
+	}
+	
+	static class TestUserService extends UserService{
+		private String id;
+		private TestUserService(String id) {
+			this.id=id;
+		}
+		
+		@Override
+		protected void upgradeLevel(User user) {
+			if(user.getId().equals(this.id)) throw new TestUserServiceException();
+			super.upgradeLevel(user);
+		}
+	}
+	
+	static class TestUserServiceException extends RuntimeException {
+	}
+
 }

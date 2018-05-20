@@ -41,4 +41,9 @@ public class UserService {
 		userDao.add(user);
 	}
 	
+	protected void upgradeLevel(User user) {
+		user.upgradeLevel();
+		userDao.update(user);
+	}
+	
 }
