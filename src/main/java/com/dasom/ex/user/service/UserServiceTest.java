@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.suppliers.TestedOnSupplier;
@@ -28,11 +30,9 @@ import static com.dasom.ex.user.service.UserService.MIN_RECCOMEND_FOR_GOLD;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/applicationContext.xml")
 public class UserServiceTest {
-	@Autowired
-	UserService userService;
-	@Autowired
-	UserDao userDao; 
-	
+	@Autowired UserService userService;
+	@Autowired UserDao userDao; 
+	@Autowired DataSource dataSource;
 	List<User> users;
 	
 	@Before
@@ -47,7 +47,7 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	public void upgradeLevel() {
+	public void upgradeLevel() throws Exception{
 		userDao.deleteAll();
 		
 		for(User user:users)
@@ -91,9 +91,10 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	public void upgradeAllOrNothing() {
+	public void upgradeAllOrNothing() throws Exception{
 		UserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
+		testUserService.setDataSource(this.dataSource);
 		userDao.deleteAll();
 		for(User user:users) userDao.add(user);
 		
