@@ -16,11 +16,13 @@ import org.junit.Test;
 import org.junit.experimental.theories.suppliers.TestedOnSupplier;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.dasom.ex.mail.MailSender;
+import com.dasom.ex.mail.MockMailSender;
 import com.dasom.ex.user.dao.UserDao;
 import com.dasom.ex.user.domain.Level;
 import com.dasom.ex.user.domain.User;
@@ -131,4 +133,25 @@ public class UserServiceTest {
 	static class TestUserServiceException extends RuntimeException {
 	}
 
+	@Test
+	@DirtiesContext
+	public void upgradeLevels() throws Exception{
+		userDao.deleteAll();
+		for(User user:users) userDao.add(user);
+		
+		MockMailSender mockMailSender = new MockMailSender();
+		userService.setMailSender(mockMailSender);
+		
+		userService.upgradeLevels();
+		checkLevel(users.get(0), false);
+		checkLevel(users.get(1), true);
+		checkLevel(users.get(2), false);
+		checkLevel(users.get(3), true);
+		checkLevel(users.get(4), false);
+		
+		List<String> requests = mockMailSender.getRequests();
+		assertThat(requests.size(),is(2));
+		assertThat(requests.get(0), is(users.get(1).getEmail()));
+		assertThat(requests.get(1), is(users.get(3).getEmail()));
+	}
 }
