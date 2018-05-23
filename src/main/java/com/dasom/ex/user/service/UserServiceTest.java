@@ -18,7 +18,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import com.dasom.ex.mail.MailSender;
 import com.dasom.ex.user.dao.UserDao;
 import com.dasom.ex.user.domain.Level;
 import com.dasom.ex.user.domain.User;
@@ -33,16 +35,18 @@ public class UserServiceTest {
 	@Autowired UserService userService;
 	@Autowired UserDao userDao; 
 	@Autowired DataSource dataSource;
-	List<User> users;
+	@Autowired MailSender mailSender;
+	@Autowired PlatformTransactionManager transactionManager;
 	
+	List<User> users;
 	@Before
 	public void setUp() {
 		users=Arrays.asList(
-				new User("t1","ㅌ1","p1",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER-1,0),
-				new User("t2","ㅌ2","p2",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER,0),
-				new User("t3","ㅌ3","p3",Level.SILVER,MIN_RECCOMEND_FOR_GOLD-1,29),
-				new User("t4","ㅌ4","p4",Level.SILVER,MIN_RECCOMEND_FOR_GOLD,30),
-				new User("t5","ㅌ5","p5",Level.GOLD,100,Integer.MAX_VALUE)
+				new User("t1","ㅌ1","p1",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER-1,0,"ektha03@gmail.com"),
+				new User("t2","ㅌ2","p2",Level.BASIC,MIN_LOGCOUNT_FOR_SILVER,0,"ektha03@gmail.com"),
+				new User("t3","ㅌ3","p3",Level.SILVER,MIN_RECCOMEND_FOR_GOLD-1,29,"ektha03@gmail.com"),
+				new User("t4","ㅌ4","p4",Level.SILVER,MIN_RECCOMEND_FOR_GOLD,30,"ektha03@gmail.com"),
+				new User("t5","ㅌ5","p5",Level.GOLD,100,Integer.MAX_VALUE,"ektha03@gmail.com")
 				);
 	}
 	
@@ -94,7 +98,9 @@ public class UserServiceTest {
 	public void upgradeAllOrNothing() throws Exception{
 		UserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
-		testUserService.setDataSource(this.dataSource);
+		testUserService.setTransactionManager(transactionManager);
+		testUserService.setMailSender(mailSender);
+		
 		userDao.deleteAll();
 		for(User user:users) userDao.add(user);
 		
@@ -107,7 +113,6 @@ public class UserServiceTest {
 		}
 		
 		checkLevel(users.get(1), false);
-		
 	}
 	
 	static class TestUserService extends UserService{
